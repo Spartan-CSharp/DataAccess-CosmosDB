@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 using DataAccessLibrary.Models;
 
@@ -7,21 +8,21 @@ namespace DataAccessLibrary
 {
 	public interface ICrud
 	{
-		void CreateAddress(AddressModel address);
-		void CreateEmployer(EmployerModel employer);
-		void CreatePerson(PersonModel person);
-		void DeleteAddress(AddressModel address);
-		void DeleteEmployer(EmployerModel employer);
-		void DeletePerson(PersonModel person);
-		AddressModel RetrieveAddressById(Guid id);
-		List<AddressModel> RetrieveAllAddresses();
-		List<EmployerModel> RetrieveAllEmployers();
-		List<PersonModel> RetrieveAllPeople();
-		EmployerModel RetrieveEmployerById(Guid id);
-		List<PersonModel> RetrievePeopleByEmployerId(Guid employerId);
-		PersonModel RetrievePersonById(Guid id);
-		void UpdateAddress(AddressModel address);
-		void UpdateEmployer(EmployerModel employer);
-		void UpdatePerson(PersonModel person);
+		Task CreateAddressAsync(AddressModel address);
+		Task CreateEmployerAsync(EmployerModel employer);
+		Task CreatePersonAsync(PersonModel person);
+		Task DeleteAddressAsync(AddressModel address);
+		Task DeleteEmployerAsync(EmployerModel employer);
+		Task DeletePersonAsync(PersonModel person);
+		Task<AddressModel> RetrieveAddressByIdAsync(Guid id);
+		Task<List<AddressModel>> RetrieveAllAddressesAsync();
+		Task<List<EmployerModel>> RetrieveAllEmployersAsync();
+		Task<List<PersonModel>> RetrieveAllPeopleAsync();
+		Task<EmployerModel> RetrieveEmployerByIdAsync(Guid id);
+		Task<List<PersonModel>> RetrievePeopleByEmployerIdAsync(Guid employerId);
+		Task<PersonModel> RetrievePersonByIdAsync(Guid id);
+		Task UpdateAddressAsync(AddressModel address);
+		Task UpdateEmployerAsync(EmployerModel employer);
+		Task UpdatePersonAsync(PersonModel person);
 	}
 }

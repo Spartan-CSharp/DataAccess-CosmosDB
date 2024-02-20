@@ -3,11 +3,14 @@ using System.Collections.Generic;
 
 using MongoDB.Bson.Serialization.Attributes;
 
+using Newtonsoft.Json;
+
 namespace DataAccessLibrary.Models
 {
 	public class PersonModel
 	{
 		[BsonId]
+		[JsonProperty(PropertyName = "id")]
 		public Guid Id { get; set; } = Guid.NewGuid();
 		public string FirstName { get; set; }
 		public string LastName { get; set; }

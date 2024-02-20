@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
+using DataAccessLibrary.CosmosDBDataAccess;
 using DataAccessLibrary.Models;
 using DataAccessLibrary.MongoDBDataAccess;
 
@@ -23,14 +25,19 @@ namespace DataAccessLibrary
 					_connectionString = _configuration.GetConnectionString("MongoDB");
 					_crud = new MongoDBCrud(databaseName, _connectionString);
 					break;
+				case DBTYPES.CosmosDB:
+					string endpointUri = _configuration.GetValue<string>("CosmosDB:EndpointUrl");
+					string primaryKey = _configuration.GetValue<string>("CosmosDB:PrimaryKey");
+					_crud = new CosmosDBCrud(endpointUri, primaryKey, databaseName);
+					break;
 				default:
 					break;
 			}
 		}
 
-		public void DeleteAddress(AddressModel address)
+		public async Task DeleteAddressAsync(AddressModel address)
 		{
-			List<PersonModel> allPeople = GetAllPeople();
+			List<PersonModel> allPeople = await GetAllPeopleAsync();
 			foreach ( PersonModel person in allPeople )
 			{
 				foreach ( AddressModel personAddress in person.Addresses )
@@ -38,12 +45,12 @@ namespace DataAccessLibrary
 					if ( personAddress.Id == address.Id )
 					{
 						_ = person.Addresses.Remove(personAddress);
-						UpdatePerson(person);
+						await UpdatePersonAsync(person);
 					}
 				}
 			}
 
-			List<EmployerModel> allEmployers = GetAllEmployers();
+			List<EmployerModel> allEmployers = await GetAllEmployersAsync();
 			foreach ( EmployerModel employer in allEmployers )
 			{
 				foreach ( AddressModel employerAddress in employer.Addresses )
@@ -51,112 +58,112 @@ namespace DataAccessLibrary
 					if ( employerAddress.Id == address.Id )
 					{
 						_ = employer.Addresses.Remove(employerAddress);
-						UpdateEmployer(employer);
+						await UpdateEmployerAsync(employer);
 					}
 				}
 			}
 
-			_crud.DeleteAddress(address);
+			await _crud.DeleteAddressAsync(address);
 		}
 
-		public void DeleteEmployer(EmployerModel employer)
+		public async Task DeleteEmployerAsync(EmployerModel employer)
 		{
-			List<PersonModel> people = _crud.RetrievePeopleByEmployerId(employer.Id);
+			List<PersonModel> people = await _crud.RetrievePeopleByEmployerIdAsync(employer.Id);
 			foreach ( PersonModel person in people )
 			{
 				person.Employer = null;
-				UpdatePerson(person);
+				await UpdatePersonAsync(person);
 			}
 
-			_crud.DeleteEmployer(employer);
+			await _crud.DeleteEmployerAsync(employer);
 		}
 
-		public void DeletePerson(PersonModel person)
+		public async Task DeletePersonAsync(PersonModel person)
 		{
-			_crud.DeletePerson(person);
+			await _crud.DeletePersonAsync(person);
 		}
 
-		public AddressModel GetAddressById(Guid addressId)
+		public async Task<AddressModel> GetAddressByIdAsync(Guid addressId)
 		{
-			AddressModel output = _crud.RetrieveAddressById(addressId);
+			AddressModel output = await _crud.RetrieveAddressByIdAsync(addressId);
 			return output;
 		}
 
-		public List<AddressModel> GetAllAddresses()
+		public async Task<List<AddressModel>> GetAllAddressesAsync()
 		{
-			List<AddressModel> output = _crud.RetrieveAllAddresses();
+			List<AddressModel> output = await _crud.RetrieveAllAddressesAsync();
 			return output;
 		}
 
-		public List<EmployerModel> GetAllEmployers()
+		public async Task<List<EmployerModel>> GetAllEmployersAsync()
 		{
-			List<EmployerModel> output = _crud.RetrieveAllEmployers();
+			List<EmployerModel> output = await _crud.RetrieveAllEmployersAsync();
 			return output;
 		}
 
-		public List<PersonModel> GetAllPeople()
+		public async Task<List<PersonModel>> GetAllPeopleAsync()
 		{
-			List<PersonModel> output = _crud.RetrieveAllPeople();
+			List<PersonModel> output = await _crud.RetrieveAllPeopleAsync();
 			return output;
 		}
 
-		public EmployerModel GetEmployerById(Guid employerId)
+		public async Task<EmployerModel> GetEmployerByIdAsync(Guid employerId)
 		{
-			EmployerModel output = _crud.RetrieveEmployerById(employerId);
+			EmployerModel output = await _crud.RetrieveEmployerByIdAsync(employerId);
 			return output;
 		}
 
-		public PersonModel GetPersonById(Guid personId)
+		public async Task<PersonModel> GetPersonByIdAsync(Guid personId)
 		{
-			PersonModel output = _crud.RetrievePersonById(personId);
+			PersonModel output = await _crud.RetrievePersonByIdAsync(personId);
 			return output;
 		}
 
-		public void SaveNewAddress(AddressModel address)
+		public async Task SaveNewAddressAsync(AddressModel address)
 		{
-			_crud.CreateAddress(address);
+			await _crud.CreateAddressAsync(address);
 		}
 
-		public void SaveNewEmployer(EmployerModel employer)
+		public async Task SaveNewEmployerAsync(EmployerModel employer)
 		{
-			List<AddressModel> existingAddresses = GetAllAddresses();
+			List<AddressModel> existingAddresses = await GetAllAddressesAsync();
 			foreach ( AddressModel employerAddress in employer.Addresses )
 			{
 				if ( existingAddresses.Find(x => x.Id == employerAddress.Id) == null )
 				{
-					SaveNewAddress(employerAddress);
+					await SaveNewAddressAsync(employerAddress);
 				}
 			}
 
-			_crud.CreateEmployer(employer);
+			await _crud.CreateEmployerAsync(employer);
 		}
 
-		public void SaveNewPerson(PersonModel person)
+		public async Task SaveNewPersonAsync(PersonModel person)
 		{
 			if ( person.Employer != null )
 			{
-				EmployerModel existingEmployer = GetEmployerById(person.Employer.Id);
+				EmployerModel existingEmployer = await GetEmployerByIdAsync(person.Employer.Id);
 				if ( existingEmployer == null )
 				{
-					SaveNewEmployer(person.Employer);
+					await SaveNewEmployerAsync(person.Employer);
 				}
 			}
 
-			List<AddressModel> existingAddresses = GetAllAddresses();
+			List<AddressModel> existingAddresses = await GetAllAddressesAsync();
 			foreach ( AddressModel personAddress in person.Addresses )
 			{
 				if ( existingAddresses.Find(x => x.Id == personAddress.Id) == null )
 				{
-					SaveNewAddress(personAddress);
+					await SaveNewAddressAsync(personAddress);
 				}
 			}
 
-			_crud.CreatePerson(person);
+			await _crud.CreatePersonAsync(person);
 		}
 
-		public void UpdateAddress(AddressModel address)
+		public async Task UpdateAddressAsync(AddressModel address)
 		{
-			List<PersonModel> allPeople = GetAllPeople();
+			List<PersonModel> allPeople = await GetAllPeopleAsync();
 			foreach ( PersonModel person in allPeople )
 			{
 				foreach ( AddressModel personAddress in person.Addresses )
@@ -165,12 +172,12 @@ namespace DataAccessLibrary
 					{
 						_ = person.Addresses.Remove(personAddress);
 						person.Addresses.Add(address);
-						UpdatePerson(person);
+						await UpdatePersonAsync(person);
 					}
 				}
 			}
 
-			List<EmployerModel> allEmployers = GetAllEmployers();
+			List<EmployerModel> allEmployers = await GetAllEmployersAsync();
 			foreach ( EmployerModel employer in allEmployers )
 			{
 				foreach ( AddressModel employerAddress in employer.Addresses )
@@ -179,29 +186,29 @@ namespace DataAccessLibrary
 					{
 						_ = employer.Addresses.Remove(employerAddress);
 						employer.Addresses.Add(address);
-						UpdateEmployer(employer);
+						await UpdateEmployerAsync(employer);
 					}
 				}
 			}
 
-			_crud.UpdateAddress(address);
+			await _crud.UpdateAddressAsync(address);
 		}
 
-		public void UpdateEmployer(EmployerModel employer)
+		public async Task UpdateEmployerAsync(EmployerModel employer)
 		{
-			List<PersonModel> people = _crud.RetrievePeopleByEmployerId(employer.Id);
+			List<PersonModel> people = await _crud.RetrievePeopleByEmployerIdAsync(employer.Id);
 			foreach ( PersonModel person in people )
 			{
 				person.Employer = employer;
-				UpdatePerson(person);
+				await UpdatePersonAsync(person);
 			}
 
-			_crud.UpdateEmployer(employer);
+			await _crud.UpdateEmployerAsync(employer);
 		}
 
-		public void UpdatePerson(PersonModel person)
+		public async Task UpdatePersonAsync(PersonModel person)
 		{
-			_crud.UpdatePerson(person);
+			await _crud.UpdatePersonAsync(person);
 		}
 	}
 }

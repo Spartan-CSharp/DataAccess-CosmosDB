@@ -2,6 +2,7 @@
 {
 	public enum DBTYPES
 	{
-		MongoDB
+		MongoDB,
+		CosmosDB
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 using DataAccessLibrary.Models;
 
@@ -17,91 +18,91 @@ namespace DataAccessLibrary.MongoDBDataAccess
 			_mongoDatabase = client.GetDatabase(databaseName);
 		}
 
-		public void CreateAddress(AddressModel address)
+		public async Task CreateAddressAsync(AddressModel address)
 		{
-			_mongoDatabase.CreateRecord("Addresses", address);
+			await _mongoDatabase.CreateRecordAsync("Addresses", address);
 		}
 
-		public void CreateEmployer(EmployerModel employer)
+		public async Task CreateEmployerAsync(EmployerModel employer)
 		{
-			_mongoDatabase.CreateRecord("Employers", employer);
+			await _mongoDatabase.CreateRecordAsync("Employers", employer);
 		}
 
-		public void CreatePerson(PersonModel person)
+		public async Task CreatePersonAsync(PersonModel person)
 		{
-			_mongoDatabase.CreateRecord("People", person);
+			await _mongoDatabase.CreateRecordAsync("People", person);
 		}
 
-		public void DeleteAddress(AddressModel address)
+		public async Task DeleteAddressAsync(AddressModel address)
 		{
-			_mongoDatabase.DeleteRecord<AddressModel>("Addresses", address.Id);
+			await _mongoDatabase.DeleteRecordAsync<AddressModel>("Addresses", address.Id);
 		}
 
-		public void DeleteEmployer(EmployerModel employer)
+		public async Task DeleteEmployerAsync(EmployerModel employer)
 		{
-			_mongoDatabase.DeleteRecord<EmployerModel>("Employers", employer.Id);
+			await _mongoDatabase.DeleteRecordAsync<EmployerModel>("Employers", employer.Id);
 		}
 
-		public void DeletePerson(PersonModel person)
+		public async Task DeletePersonAsync(PersonModel person)
 		{
-			_mongoDatabase.DeleteRecord<PersonModel>("People", person.Id);
+			await _mongoDatabase.DeleteRecordAsync<PersonModel>("People", person.Id);
 		}
 
-		public AddressModel RetrieveAddressById(Guid id)
+		public async Task<AddressModel> RetrieveAddressByIdAsync(Guid id)
 		{
-			AddressModel output = _mongoDatabase.RetrieveRecordById<AddressModel>("Addresses", id);
+			AddressModel output = await _mongoDatabase.RetrieveRecordByIdAsync<AddressModel>("Addresses", id);
 			return output;
 		}
 
-		public List<AddressModel> RetrieveAllAddresses()
+		public async Task<List<AddressModel>> RetrieveAllAddressesAsync()
 		{
-			List<AddressModel> output = _mongoDatabase.RetrieveRecords<AddressModel>("Addresses");
+			List<AddressModel> output = await _mongoDatabase.RetrieveRecordsAsync<AddressModel>("Addresses");
 			return output;
 		}
 
-		public List<EmployerModel> RetrieveAllEmployers()
+		public async Task<List<EmployerModel>> RetrieveAllEmployersAsync()
 		{
-			List<EmployerModel> output = _mongoDatabase.RetrieveRecords<EmployerModel>("Employers");
+			List<EmployerModel> output = await _mongoDatabase.RetrieveRecordsAsync<EmployerModel>("Employers");
 			return output;
 		}
 
-		public List<PersonModel> RetrieveAllPeople()
+		public async Task<List<PersonModel>> RetrieveAllPeopleAsync()
 		{
-			List<PersonModel> output = _mongoDatabase.RetrieveRecords<PersonModel>("People");
+			List<PersonModel> output = await _mongoDatabase.RetrieveRecordsAsync<PersonModel>("People");
 			return output;
 		}
 
-		public EmployerModel RetrieveEmployerById(Guid id)
+		public async Task<EmployerModel> RetrieveEmployerByIdAsync(Guid id)
 		{
-			EmployerModel output = _mongoDatabase.RetrieveRecordById<EmployerModel>("Employers", id);
+			EmployerModel output = await _mongoDatabase.RetrieveRecordByIdAsync<EmployerModel>("Employers", id);
 			return output;
 		}
 
-		public List<PersonModel> RetrievePeopleByEmployerId(Guid employerId)
+		public async Task<List<PersonModel>> RetrievePeopleByEmployerIdAsync(Guid employerId)
 		{
-			List<PersonModel> output = RetrieveAllPeople().FindAll(x => x.Employer?.Id == employerId);
+			List<PersonModel> output = (await RetrieveAllPeopleAsync()).FindAll(x => x.Employer?.Id == employerId);
 			return output;
 		}
 
-		public PersonModel RetrievePersonById(Guid id)
+		public async Task<PersonModel> RetrievePersonByIdAsync(Guid id)
 		{
-			PersonModel output = _mongoDatabase.RetrieveRecordById<PersonModel>("People", id);
+			PersonModel output = await _mongoDatabase.RetrieveRecordByIdAsync<PersonModel>("People", id);
 			return output;
 		}
 
-		public void UpdateAddress(AddressModel address)
+		public async Task UpdateAddressAsync(AddressModel address)
 		{
-			_mongoDatabase.UpdateRecord("Addresses", address.Id, address);
+			await _mongoDatabase.UpdateRecordAsync("Addresses", address.Id, address);
 		}
 
-		public void UpdateEmployer(EmployerModel employer)
+		public async Task UpdateEmployerAsync(EmployerModel employer)
 		{
-			_mongoDatabase.UpdateRecord("Employers", employer.Id, employer);
+			await _mongoDatabase.UpdateRecordAsync("Employers", employer.Id, employer);
 		}
 
-		public void UpdatePerson(PersonModel person)
+		public async Task UpdatePersonAsync(PersonModel person)
 		{
-			_mongoDatabase.UpdateRecord("People", person.Id, person);
+			await _mongoDatabase.UpdateRecordAsync("People", person.Id, person);
 		}
 	}
 }

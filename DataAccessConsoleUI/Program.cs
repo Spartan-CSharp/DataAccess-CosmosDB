@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 using DataAccessLibrary;
 using DataAccessLibrary.Models;
@@ -15,12 +16,12 @@ namespace DataAccessConsoleUI
 		private static IConfiguration _configuration;
 		private static IDataLogic _data;
 
-		private static void Main(string[] args)
+		private static async Task Main()
 		{
 			InitializeConfiguration();
 			InitializeDatabaseConnection();
 			ProgramIntro();
-			ProgramLoop();
+			await ProgramLoopAsync();
 			ProgramOutro();
 		}
 
@@ -34,7 +35,7 @@ namespace DataAccessConsoleUI
 
 		private static void InitializeDatabaseConnection()
 		{
-			_data = new DataLogic(_configuration, DBTYPES.MongoDB, "MongoPeopleDB");
+			_data = new DataLogic(_configuration, DBTYPES.CosmosDB, "CosmsPeopleDB");
 		}
 
 		private static void ProgramIntro()
@@ -45,7 +46,7 @@ namespace DataAccessConsoleUI
 			Console.WriteLine();
 		}
 
-		private static void ProgramLoop()
+		private static async Task ProgramLoopAsync()
 		{
 			char action;
 			char recordtype;
@@ -60,15 +61,15 @@ namespace DataAccessConsoleUI
 						switch ( recordtype )
 						{
 							case 'p':
-								PersonModel person = CreateNewPerson();
+								PersonModel person = await CreateNewPersonAsync();
 								DisplayPerson(person);
 								break;
 							case 'a':
-								AddressModel address = CreateNewAddress();
+								AddressModel address = await CreateNewAddressAsync();
 								DisplayAddress(address);
 								break;
 							case 'e':
-								EmployerModel employer = CreateNewEmployer();
+								EmployerModel employer = await CreateNewEmployerAsync();
 								DisplayEmployer(employer);
 								break;
 							case 'x':
@@ -83,7 +84,7 @@ namespace DataAccessConsoleUI
 						switch ( recordtype )
 						{
 							case 'p':
-								PersonModel person = RetrievePerson();
+								PersonModel person = await RetrievePersonAsync();
 								if ( person != null )
 								{
 									DisplayPerson(person);
@@ -91,7 +92,7 @@ namespace DataAccessConsoleUI
 
 								break;
 							case 'a':
-								AddressModel address = RetrieveAddress();
+								AddressModel address = await RetrieveAddressAsync();
 								if ( address != null )
 								{
 									DisplayAddress(address);
@@ -99,7 +100,7 @@ namespace DataAccessConsoleUI
 
 								break;
 							case 'e':
-								EmployerModel employer = RetrieveEmployer();
+								EmployerModel employer = await RetrieveEmployerAsync();
 								if ( employer != null )
 								{
 									DisplayEmployer(employer);
@@ -118,28 +119,28 @@ namespace DataAccessConsoleUI
 						switch ( recordtype )
 						{
 							case 'p':
-								PersonModel person = RetrievePerson();
+								PersonModel person = await RetrievePersonAsync();
 								if ( person != null )
 								{
-									person.UpdatePerson();
+									await person.UpdatePersonAsync();
 									DisplayPerson(person);
 								}
 
 								break;
 							case 'a':
-								AddressModel address = RetrieveAddress();
+								AddressModel address = await RetrieveAddressAsync();
 								if ( address != null )
 								{
-									address.UpdateAddress();
+									await address.UpdateAddressAsync();
 									DisplayAddress(address);
 								}
 
 								break;
 							case 'e':
-								EmployerModel employer = RetrieveEmployer();
+								EmployerModel employer = await RetrieveEmployerAsync();
 								if ( employer != null )
 								{
-									employer.UpdateEmployer();
+									await employer.UpdateEmployerAsync();
 									DisplayEmployer(employer);
 								}
 
@@ -156,13 +157,13 @@ namespace DataAccessConsoleUI
 						switch ( recordtype )
 						{
 							case 'p':
-								DeletePerson();
+								await DeletePersonAsync();
 								break;
 							case 'a':
-								DeleteAddress();
+								await DeleteAddressAsync();
 								break;
 							case 'e':
-								DeleteEmployer();
+								await DeleteEmployerAsync();
 								break;
 							case 'x':
 								break;
@@ -223,7 +224,7 @@ namespace DataAccessConsoleUI
 			return output;
 		}
 
-		private static PersonModel CreateNewPerson()
+		private static async Task<PersonModel> CreateNewPersonAsync()
 		{
 			PersonModel output = new PersonModel();
 
@@ -265,13 +266,13 @@ namespace DataAccessConsoleUI
 				{
 					if ( selection == 2 )
 					{
-						AddressModel address = CreateNewAddress();
+						AddressModel address = await CreateNewAddressAsync();
 						output.Addresses.Add(address);
 					}
 
 					if ( selection == 3 )
 					{
-						AddressModel address = RetrieveAddress();
+						AddressModel address = await RetrieveAddressAsync();
 						AddressModel checkifexistingaddress = output.Addresses.Where(x => x.Id == address.Id).FirstOrDefault();
 						if ( checkifexistingaddress == null )
 						{
@@ -317,22 +318,22 @@ namespace DataAccessConsoleUI
 
 			if ( selection == 2 )
 			{
-				EmployerModel employer = CreateNewEmployer();
+				EmployerModel employer = await CreateNewEmployerAsync();
 				output.Employer = employer;
 			}
 
 			if ( selection == 3 )
 			{
-				EmployerModel employer = RetrieveEmployer();
+				EmployerModel employer = await RetrieveEmployerAsync();
 				output.Employer = employer;
 			}
 
-			_data.SaveNewPerson(output);
+			await _data.SaveNewPersonAsync(output);
 
 			return output;
 		}
 
-		private static AddressModel CreateNewAddress()
+		private static async Task<AddressModel> CreateNewAddressAsync()
 		{
 			AddressModel output = new AddressModel();
 
@@ -359,12 +360,12 @@ namespace DataAccessConsoleUI
 			} while ( string.IsNullOrWhiteSpace(output.ZipCode) );
 			Console.WriteLine();
 
-			_data.SaveNewAddress(output);
+			await _data.SaveNewAddressAsync(output);
 
 			return output;
 		}
 
-		private static EmployerModel CreateNewEmployer()
+		private static async Task<EmployerModel> CreateNewEmployerAsync()
 		{
 			EmployerModel output = new EmployerModel();
 
@@ -395,13 +396,13 @@ namespace DataAccessConsoleUI
 				{
 					if ( selection == 2 )
 					{
-						AddressModel address = CreateNewAddress();
+						AddressModel address = await CreateNewAddressAsync();
 						output.Addresses.Add(address);
 					}
 
 					if ( selection == 3 )
 					{
-						AddressModel address = RetrieveAddress();
+						AddressModel address = await RetrieveAddressAsync();
 						AddressModel checkifexistingaddress = output.Addresses.Where(x => x.Id == address.Id).FirstOrDefault();
 						if ( checkifexistingaddress == null )
 						{
@@ -430,16 +431,16 @@ namespace DataAccessConsoleUI
 				} while ( !done );
 			}
 
-			_data.SaveNewEmployer(output);
+			await _data.SaveNewEmployerAsync(output);
 
 			return output;
 		}
 
-		private static PersonModel RetrievePerson()
+		private static async Task<PersonModel> RetrievePersonAsync()
 		{
 			PersonModel output = new PersonModel();
 
-			List<PersonModel> people = _data.GetAllPeople();
+			List<PersonModel> people = await _data.GetAllPeopleAsync();
 
 			if ( people.Count > 0 )
 			{
@@ -476,11 +477,11 @@ namespace DataAccessConsoleUI
 			return output;
 		}
 
-		private static AddressModel RetrieveAddress()
+		private static async Task<AddressModel> RetrieveAddressAsync()
 		{
 			AddressModel output = new AddressModel();
 
-			List<AddressModel> addresses = _data.GetAllAddresses();
+			List<AddressModel> addresses = await _data.GetAllAddressesAsync();
 
 			if ( addresses.Count > 0 )
 			{
@@ -517,11 +518,11 @@ namespace DataAccessConsoleUI
 			return output;
 		}
 
-		private static EmployerModel RetrieveEmployer()
+		private static async Task<EmployerModel> RetrieveEmployerAsync()
 		{
 			EmployerModel output = new EmployerModel();
 
-			List<EmployerModel> employers = _data.GetAllEmployers();
+			List<EmployerModel> employers = await _data.GetAllEmployersAsync();
 
 			if ( employers.Count > 0 )
 			{
@@ -558,7 +559,7 @@ namespace DataAccessConsoleUI
 			return output;
 		}
 
-		private static void UpdatePerson(this PersonModel person)
+		private static async Task UpdatePersonAsync(this PersonModel person)
 		{
 			Console.WriteLine($"Current First Name: {person.FirstName}");
 			Console.Write("Enter new First Name (press enter on blank line for no change): ");
@@ -650,13 +651,13 @@ namespace DataAccessConsoleUI
 
 					if ( addressselect == 1 )
 					{
-						AddressModel address = CreateNewAddress();
+						AddressModel address = await CreateNewAddressAsync();
 						person.Addresses.Add(address);
 					}
 
 					if ( addressselect == 2 )
 					{
-						AddressModel address = RetrieveAddress();
+						AddressModel address = await RetrieveAddressAsync();
 						AddressModel checkifexistingaddress = person.Addresses.Where(x => x.Id == address.Id).FirstOrDefault();
 						if ( checkifexistingaddress == null )
 						{
@@ -677,7 +678,7 @@ namespace DataAccessConsoleUI
 						AddressModel address = person.Addresses[addressselect - 1];
 						if ( addressvalid && address != null )
 						{
-							address.UpdateAddress();
+							await address.UpdateAddressAsync();
 						}
 						else
 						{
@@ -744,26 +745,26 @@ namespace DataAccessConsoleUI
 
 				if ( employerselect == 1 )
 				{
-					EmployerModel employer = CreateNewEmployer();
+					EmployerModel employer = await CreateNewEmployerAsync();
 					person.Employer = employer;
 				}
 
 				if ( employerselect == 3 )
 				{
-					EmployerModel employer = RetrieveEmployer();
+					EmployerModel employer = await RetrieveEmployerAsync();
 					person.Employer = employer;
 				}
 			}
 
 			if ( selection == 3 )
 			{
-				person.Employer.UpdateEmployer();
+				await person.Employer.UpdateEmployerAsync();
 			}
 
-			_data.UpdatePerson(person);
+			await _data.UpdatePersonAsync(person);
 		}
 
-		private static void UpdateAddress(this AddressModel address)
+		private static async Task UpdateAddressAsync(this AddressModel address)
 		{
 			Console.WriteLine($"Current Street Address: {address.StreetAddress}");
 			Console.Write("Enter new Street Address (press enter on blank line for no change): ");
@@ -797,10 +798,10 @@ namespace DataAccessConsoleUI
 				address.ZipCode = input;
 			}
 
-			_data.UpdateAddress(address);
+			await _data.UpdateAddressAsync(address);
 		}
 
-		private static void UpdateEmployer(this EmployerModel employer)
+		private static async Task UpdateEmployerAsync(this EmployerModel employer)
 		{
 			Console.WriteLine($"Current Company Name: {employer.CompanyName}");
 			Console.Write("Enter new Company Name (press enter on blank line for no change): ");
@@ -876,13 +877,13 @@ namespace DataAccessConsoleUI
 
 					if ( addressselect == 1 )
 					{
-						AddressModel address = CreateNewAddress();
+						AddressModel address = await CreateNewAddressAsync();
 						employer.Addresses.Add(address);
 					}
 
 					if ( addressselect == 2 )
 					{
-						AddressModel address = RetrieveAddress();
+						AddressModel address = await RetrieveAddressAsync();
 						AddressModel checkifexistingaddress = employer.Addresses.Where(x => x.Id == address.Id).FirstOrDefault();
 						if ( checkifexistingaddress == null )
 						{
@@ -903,7 +904,7 @@ namespace DataAccessConsoleUI
 						AddressModel address = employer.Addresses[addressselect - 1];
 						if ( addressvalid && address != null )
 						{
-							address.UpdateAddress();
+							await address.UpdateAddressAsync();
 						}
 						else
 						{
@@ -921,28 +922,28 @@ namespace DataAccessConsoleUI
 				}
 			} while ( !done );
 
-			_data.UpdateEmployer(employer);
+			await _data.UpdateEmployerAsync(employer);
 		}
 
-		private static void DeletePerson()
+		private static async Task DeletePersonAsync()
 		{
-			PersonModel output = RetrievePerson();
+			PersonModel output = await RetrievePersonAsync();
 
-			_data.DeletePerson(output);
+			await _data.DeletePersonAsync(output);
 		}
 
-		private static void DeleteAddress()
+		private static async Task DeleteAddressAsync()
 		{
-			AddressModel output = RetrieveAddress();
+			AddressModel output = await RetrieveAddressAsync();
 
-			_data.DeleteAddress(output);
+			await _data.DeleteAddressAsync(output);
 		}
 
-		private static void DeleteEmployer()
+		private static async Task DeleteEmployerAsync()
 		{
-			EmployerModel output = RetrieveEmployer();
+			EmployerModel output = await RetrieveEmployerAsync();
 
-			_data.DeleteEmployer(output);
+			await _data.DeleteEmployerAsync(output);
 		}
 
 		private static void DisplayPerson(PersonModel person)
