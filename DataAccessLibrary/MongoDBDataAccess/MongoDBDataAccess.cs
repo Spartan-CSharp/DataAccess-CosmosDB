@@ -43,14 +43,14 @@ namespace DataAccessLibrary.MongoDBDataAccess
 			BsonBinaryData bindata = new BsonBinaryData(id, GuidRepresentation.Standard);
 			BsonDocument filter = new BsonDocument("_id", bindata);
 
-			await collection.ReplaceOneAsync(filter, record);
+			_ = await collection.ReplaceOneAsync(filter, record);
 		}
 
 		internal static async Task DeleteRecordAsync<T>(this IMongoDatabase mongoDatabase, string table, Guid id)
 		{
 			IMongoCollection<T> collection = mongoDatabase.GetCollection<T>(table);
 			FilterDefinition<T> filter = Builders<T>.Filter.Eq("Id", id);
-			await collection.DeleteOneAsync(filter);
+			_ = await collection.DeleteOneAsync(filter);
 		}
 	}
 }

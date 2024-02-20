@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 using Microsoft.Azure.Cosmos;
@@ -12,7 +11,7 @@ namespace DataAccessLibrary.CosmosDBDataAccess
 		internal static async Task CreateRecordAsync<T>(this Database cosmosDatabase, string containerName, T record)
 		{
 			Container container = cosmosDatabase.GetContainer(containerName);
-			await container.CreateItemAsync(record);
+			_ = await container.CreateItemAsync(record);
 		}
 
 		internal static async Task<T> RetrieveRecordByIdAsync<T>(this Database cosmosDatabase, string containerName, string id)
@@ -55,13 +54,13 @@ namespace DataAccessLibrary.CosmosDBDataAccess
 		internal static async Task UpdateRecordAsync<T>(this Database cosmosDatabase, string containerName, T record)
 		{
 			Container container = cosmosDatabase.GetContainer(containerName);
-			await container.UpsertItemAsync(record);
+			_ = await container.UpsertItemAsync(record);
 		}
 
 		internal static async Task DeleteRecordAsync<T>(this Database cosmosDatabase, string containerName, string id, PartitionKey partitionKey)
 		{
 			Container container = cosmosDatabase.GetContainer(containerName);
-			await container.DeleteItemAsync<T>(id, partitionKey);
+			_ = await container.DeleteItemAsync<T>(id, partitionKey);
 		}
 	}
 }
